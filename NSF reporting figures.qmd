@@ -1,0 +1,728 @@
+---
+title: "nsf report 2024"
+format:
+  html:
+    theme: default
+    toc: true
+    number-sections: true
+---
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(dplyr)
+
+# Get world data
+world <- ne_countries(scale = "medium", returnclass = "sf")
+
+# Data frame with country names and counts
+data <- data.frame(
+  name = c("United States of America", "Brazil", "Germany", "Canada", "Nigeria",
+           "Australia", "Peru", "Israel", "United Kingdom", "Panama",
+           "Saudi Arabia", "Kenya", "Japan", "Nepal", "Spain",
+           "Sweden", "Czech Republic", "Vietnam"),
+  count = c(252, 6, 5, 5, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+)
+
+# Join this data with the world map data
+world_data <- left_join(world, data, by = "name")
+
+# Plot
+# Plot with adjusted scale
+countries_plot <- ggplot(data = world_data) +
+  geom_sf(aes(fill = count), color = "white", size = 0.25) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", 
+                      limits = c(0, 252), 
+                      breaks = c(1,  50, 100, 252),
+                      na.value = "grey90", name = "Users",
+                      labels = scales::comma) +
+  #labs(title = "ESIIL Cyverse users per country") +
+  theme_minimal() +
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0.5))
+
+ggsave(countries_plot, file="countries_plot.png", dpi=600)
+
+```
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+
+# Get U.S. states and Canadian provinces data
+states <- ne_states(country = "united states of america", returnclass = "sf")
+provinces <- ne_states(country = "canada", returnclass = "sf")
+
+# Combine U.S. states and Canadian provinces
+north_america_map <- rbind(states, provinces)
+
+# Data frame with regions and counts
+data <- data.frame(
+  region = c("colorado", "california", "florida", "south dakota", "arizona",
+             "louisiana", "new york", "south carolina", "new mexico", "north carolina",
+             "minnesota", "massachusetts", "connecticut", "oregon", "wisconsin",
+             "maryland", "virginia", "pennsylvania", "texas", "michigan", "illinois",
+             "ontario", "north dakota", "georgia", "new jersey", "utah",
+             "missouri", "idaho", "montana", "maine", "new hampshire", "ohio", "nevada",
+             "hawaii", "arkansas", "wyoming", "oklahoma", "tennessee", "washington",
+             "alabama", "district of columbia", "kentucky", "indiana", "rhode island", "iowa",
+             "quebec", "british columbia"),
+  count = c(76, 20, 16, 13, 8, 8, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4,
+            3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+)
+
+# Map data to region names
+north_america_map$region <- tolower(north_america_map$name)
+north_america_map <- left_join(north_america_map, data, by = "region")
+
+# Filter out regions with no data
+filled_regions <- north_america_map[!is.na(north_america_map$count), ]
+
+# Calculate the bounding box of the filled regions
+bbox <- st_bbox(filled_regions)
+
+# Crop the original map based on the bounding box
+cropped_map <- st_crop(north_america_map, bbox)
+
+# Plot the map, focusing only on regions with data
+states_plot <- ggplot(data = cropped_map) +
+  geom_sf(aes(fill = count), color = "white", size = 0.25) +
+  scale_fill_gradient(low = "lightblue", high = "darkblue", na.value = "grey90", name = "Users") +
+  #labs(title = "ESIIL Cyverse users per state") +
+  theme_minimal() +
+  theme(legend.position = "right")
+
+ggsave(states_plot, file="states_plot.png", dpi=600)
+
+
+```
+
+
+
+```{r}
+library(plotly)
+
+# Define tasks with categories, subtasks, and the new task with corrected vector lengths
+tasks <- data.frame(
+  Task = c("Build Gantt Chart", 
+           "OASIS templates", "Working group OASIS", "Postdoc OASIS", "Education OASIS",
+           "Persistent storage", "Persistent storage - Generic 1", "Persistent storage - Generic 2", "Persistent storage - Generic 3",
+           "Cloud instances", "Cloud instances - Generic 1", "Cloud instances - Generic 2", "Cloud instances - Generic 3",
+           "Docker images", "Docker images - Generic 1", "Docker images - Generic 2", "Docker images - Generic 3",
+           "Working groups", "Working groups - Generic 1", "Working groups - Generic 2", "Working groups - Generic 3",
+           "Postdocs", "Postdocs - Generic 1", "Postdocs - Generic 2", "Postdocs - Generic 3",
+           "Collaborations", "Collaborations - Generic 1", "Collaborations - Generic 2", "Collaborations - Generic 3"),
+  Start = as.Date(c("2023-06-23", 
+                    "2023-10-01", "2023-10-01", "2023-12-01", "2023-12-01",
+                    "2023-08-09", "2023-08-19", "2023-08-29", "2023-09-08",
+                    "2023-09-18", "2023-09-28", "2023-10-08", "2023-10-18",
+                    "2023-10-28", "2023-11-07", "2023-11-17", "2023-11-27",
+                    "2023-12-07", "2023-12-17", "2023-12-27", "2024-01-06",
+                    "2024-01-16", "2024-01-26", "2024-02-05", "2024-02-15",
+                    "2024-02-25", "2024-03-06", "2024-03-16", "2024-03-26")),
+  End = as.Date(c("2023-07-23", 
+                  "2024-07-09", "2024-07-19", "2024-07-29", "202418-08-08",
+                  "2023-08-18", "2023-08-28", "2023-09-07", "2023-09-17",
+                  "2023-09-27", "2023-10-07", "2023-10-17", "2023-10-27",
+                  "2023-11-06", "2023-11-16", "2023-11-26", "2023-12-06",
+                  "2023-12-16", "2023-12-26", "2024-01-05", "2024-01-15",
+                  "2024-01-25", "2024-02-04", "2024-02-14", "2024-02-24",
+                  "2024-03-05", "2024-03-15", "2024-03-25", "2024-04-04")),
+  Owner = c("Project Coordinator", rep(c("Project Manager", "Developer", "Designer"), length.out = 28)),
+  Color = c( rep('rgb(0,123,255)', 15), rep('rgb(255,0,0)', 14)),
+  Bold = c(TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE,
+           TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE)
+)
+
+
+# Reverse the order of tasks for proper y-axis plotting
+tasks$Task <- factor(tasks$Task, levels = rev(tasks$Task))
+
+# Create a Gantt chart using Plotly
+fig <- plot_ly()
+fig <- fig %>% add_trace(
+  type = 'bar',
+  x = as.numeric(difftime(tasks$End, tasks$Start, units = "days")),
+  y = tasks$Task,
+  base = as.numeric(difftime(tasks$Start, as.Date("2023-06-01"), units = "days")),
+  orientation = 'h',
+  marker = list(color = tasks$Color, line = list(color = 'rgb(255,255,255)', width = 2)),
+  hoverinfo = "text+x",
+  textposition = 'auto',
+  textfont = list(color = 'black', size = 12, family = ifelse(tasks$Bold, "bold", "regular"))
+)
+
+fig <- fig %>% layout(
+  title = "Gantt Chart for Project Categories and Subtasks",
+  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+  xaxis = list(
+    title = "Days from Start",
+    showgrid = TRUE,
+    tickvals = seq(0, 1000, by = 30),
+    ticktext = seq(as.Date("2023-06-01"), length.out = 34, by = "month") %>% format("%b %Y")
+  )#,
+  #yaxis = list(title = "", autorange = "reversed")  # Ensure tasks are listed top-down
+)
+
+# Show the plot
+fig
+
+
+# Save Plotly plot to HTML
+htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
+
+# Use webshot to convert the HTML to PNG
+webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
+
+
+```
+
+
+
+```{r}
+library(plotly)
+
+# Define tasks with categories, subtasks, and the new task with corrected vector lengths
+tasks <- data.frame(
+  Task = c("Original Plan: Design UI", 
+           "Original Plan: Develop & Test UI", "Abandon Original Plan", "Assess New Requirements", 
+           "Set up GitHub Repository Templates", "Configure GitHub Pages", 
+           "Deploy Docker Containers on Cyverse", "Implement Persistent Storage on Cyverse", 
+           "Optimize Infrastructure", "Plan Migration to Open Storage Network", 
+           "Begin Migration to Open Storage Network"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-05-01", "2023-06-01", 
+                    "2023-07-01", "2023-08-01", 
+                    "2023-09-01", "2023-10-01", 
+                    "2024-01-01", "2024-04-01", 
+                    "2024-06-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-05-01", "2023-06-01", "2023-07-01", 
+                  "2023-08-01", "2023-09-01", 
+                  "2023-10-01", "2024-06-01", 
+                  "2024-06-01", "2024-06-01", 
+                  "2025-07-01")),
+  Owner = c("Project Coordinator", "Project Coordinator", "Project Coordinator", "Project Manager", 
+            "Developer", "Developer", 
+            "Developer", "Developer", 
+            "Project Manager", "Project Manager", 
+            "Project Manager"),
+  Color = c(rep('rgb(255,165,0)', 3), rep('rgb(0,123,255)', 5), rep('rgb(34,139,34)', 3)),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE)
+)
+
+# Reverse the order of tasks for proper y-axis plotting
+tasks$Task <- factor(tasks$Task, levels = rev(tasks$Task))
+
+# Create a Gantt chart using Plotly
+fig <- plot_ly()
+fig <- fig %>% add_trace(
+  type = 'bar',
+  x = as.numeric(difftime(tasks$End, tasks$Start, units = "days")),
+  y = tasks$Task,
+  base = as.numeric(difftime(tasks$Start, as.Date("2022-08-01"), units = "days")),
+  orientation = 'h',
+  marker = list(color = tasks$Color, line = list(color = 'rgb(255,255,255)', width = 2)),
+  hoverinfo = "text+x",
+  textposition = 'auto',
+  textfont = list(color = 'black', size = 12, family = ifelse(tasks$Bold, "bold", "regular"))
+)
+
+fig <- fig %>% layout(
+  title = "Gantt Chart for Project Categories and Subtasks",
+  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+  shapes = list(
+    list(
+      type = "line",
+      x0 = as.numeric(difftime(as.Date("2024-06-01"), as.Date("2022-08-01"), units = "days")),
+      x1 = as.numeric(difftime(as.Date("2024-06-01"), as.Date("2022-08-01"), units = "days")),
+      y0 = 0,
+      y1 = 1,
+      xref = "x",
+      yref = "paper",
+      line = list(color = "red", width = 2, dash = "dash")
+    )
+  ),
+  xaxis = list(
+    title = "Days from Start",
+    showgrid = TRUE,
+    tickvals = seq(0, 1000, by = 30),
+    ticktext = seq(as.Date("2022-08-01"), length.out = 36, by = "month") %>% format("%b %Y")
+  )
+)
+
+# Show the plot
+fig
+
+# Save Plotly plot to HTML
+htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
+
+# Use webshot to convert the HTML to PNG
+webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
+
+```
+
+
+```{r}
+library(plotly)
+
+generate_gantt_chart <- function(tasks, start_date, name, color) {
+  tasks$Task <- factor(tasks$Task, levels = rev(tasks$Task))
+  
+  fig <- plot_ly()
+  fig <- fig %>% add_trace(
+    type = 'bar',
+    x = as.numeric(difftime(tasks$End, tasks$Start, units = "days")),
+    y = tasks$Task,
+    base = as.numeric(difftime(tasks$Start, start_date, units = "days")),
+    orientation = 'h',
+    marker = list(color = color, line = list(color = 'rgb(255,255,255)', width = 2)),
+    hoverinfo = "text+x",
+    textposition = 'auto',
+    textfont = list(color = 'black', size = 12, family = ifelse(tasks$Bold, "bold", "regular")),
+    name = name
+  )
+  
+  fig <- fig %>% layout(
+    paper_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    plot_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    shapes = list(
+      list(
+        type = "line",
+        x0 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        x1 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        y0 = 0,
+        y1 = 1,
+        xref = "x",
+        yref = "paper",
+        line = list(color = "red", width = 2, dash = "dash")
+      )
+    ),
+    xaxis = list(
+      title = "Days from Start",
+      showgrid = TRUE,
+      tickvals = seq(0, 1000, by = 30),
+      ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+    ),
+    yaxis = list(title = "")
+  )
+  
+  return(fig)
+}
+
+# Define the start date for the project
+start_date <- as.Date("2022-08-01")
+
+# Define tasks for each track
+tasks_individual <- data.frame(
+  Task = c("Original Plan: Design UI", 
+           "Original Plan: Develop & Test UI", "Abandon Original Plan", "Assess New Requirements", 
+           "Set up GitHub Repository Templates", "Configure GitHub Pages", 
+           "Deploy Docker Containers on Cyverse", "Implement Persistent Storage on Cyverse", 
+           "Optimize Infrastructure", "Plan Migration to Open Storage Network", 
+           "Begin Migration to Open Storage Network"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-05-01", "2023-06-01", 
+                    "2023-07-01", "2023-08-01", 
+                    "2023-09-01", "2023-10-01", 
+                    "2024-01-01", "2024-04-01", 
+                    "2024-06-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-05-01", "2023-06-01", "2023-07-01", 
+                  "2023-08-01", "2023-09-01", 
+                  "2023-10-01", "2024-06-01", 
+                  "2024-06-01", "2024-06-01", 
+                  "2025-07-01")),
+  Owner = c("Project Coordinator", "Project Coordinator", "Project Coordinator", "Project Manager", 
+            "Developer", "Developer", 
+            "Developer", "Developer", 
+            "Project Manager", "Project Manager", 
+            "Project Manager"),
+  Color = c(rep('rgb(255,165,0)', 3), rep('rgb(0,123,255)', 5), rep('rgb(34,139,34)', 3)),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE)
+)
+
+tasks_group <- data.frame(
+  Task = c("Original Plan: Design UI", 
+           "Original Plan: Develop & Test UI", "Abandon Original Plan", "Assess New Requirements", 
+           "Set up GitHub Repository Templates", "Configure GitHub Pages", 
+           "Deploy Docker Containers on Cyverse", "Implement Persistent Storage on Cyverse", 
+           "Optimize Infrastructure", "Plan Migration to Open Storage Network", 
+           "Begin Migration to Open Storage Network"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-05-01", "2023-06-01", 
+                    "2023-07-01", "2023-08-01", 
+                    "2023-09-01", "2023-10-01", 
+                    "2024-01-01", "2024-04-01", 
+                    "2024-06-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-05-01", "2023-06-01", "2023-07-01", 
+                  "2023-08-01", "2023-09-01", 
+                  "2023-10-01", "2024-06-01", 
+                  "2024-06-01", "2024-06-01", 
+                  "2025-07-01")),
+  Owner = c("Project Coordinator", "Project Coordinator", "Project Coordinator", "Project Manager", 
+            "Developer", "Developer", 
+            "Developer", "Developer", 
+            "Project Manager", "Project Manager", 
+            "Project Manager"),
+  Color = c(rep('rgb(255,165,0)', 3), rep('rgb(0,123,255)', 5), rep('rgb(34,139,34)', 3)),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE)
+)
+
+tasks_education <- data.frame(
+  Task = c("Train ESIIL Staff on Open Science and JupyterHub Basics", 
+           "Develop Pre-summit Training Model", "Pre-summit Training: Basics of GitHub, JupyterHub, R and Python", 
+           "Switch to Cyverse Discovery Environment", "Pre-summit Training: Cyverse DE, SSH keys, GitHub", 
+           "Roll Out OASIS Templates", "OASIS Template Usage", "Start Train the Trainers Program",
+           "Working Group Tech Lead Training Feb 2024", "Carbon Code Fest Pre-summit Training", 
+           "Innovation Summit 2024 Pre-summit Training", "HYR-SENSE 2024 Trainings", 
+           "Hackathon Trainings", "Curriculum Consolidation and Streamline", 
+           "Filming Educational Materials", "Working Group Tech Lead Training Feb-Mar 2025", 
+           "Innovation Summit 2025 Trainings"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-01-01", 
+                    "2023-05-01", "2023-10-01", 
+                    "2023-10-01", "2023-10-01", "2024-01-01",
+                    "2024-02-01", "2024-03-01", 
+                    "2024-04-01", "2024-05-01", 
+                    "2024-06-01", "2024-06-01", 
+                    "2024-08-01", "2025-02-01", 
+                    "2025-04-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-06-01", "2023-05-01", 
+                  "2023-10-01", "2023-10-01", 
+                  "2024-01-01", "2024-01-01", "2024-03-15",
+                  "2024-03-01", "2024-03-31", 
+                  "2024-04-30", "2024-05-31", 
+                  "2024-08-31", "2024-08-31", 
+                  "2024-12-31", "2025-03-31", 
+                  "2025-04-30")),
+  Owner = c("Education Team", "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", "Education Team",
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team"),
+  Color = c('rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(255,165,0)', 'rgb(34,139,34)', 
+            'rgb(0,123,255)', 'rgb(255,165,0)', 'rgb(0,123,255)', 'rgb(34,139,34)', 
+            'rgb(255,165,0)', 'rgb(34,139,34)', 'rgb(0,123,255)', 'rgb(255,165,0)', 
+            'rgb(34,139,34)', 'rgb(0,123,255)', 'rgb(34,139,34)', 'rgb(0,123,255)', 'rgb(255,165,0)'),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+
+# Define colors for each track
+color_individual <- 'rgb(255,165,0)'  # Orange
+color_group <- 'rgb(0,123,255)'      # Blue
+color_education <- 'rgb(34,139,34)'  # Green
+
+# Generate Gantt charts for each track with different colors
+fig_individual <- generate_gantt_chart(tasks_individual, start_date, "Individual", color_individual)
+fig_group <- generate_gantt_chart(tasks_group, start_date, "Group", color_group)
+fig_education <- generate_gantt_chart(tasks_education, start_date, "Education", color_education)
+
+# Combine all three tracks into one figure with a shared x-axis
+fig <- subplot(fig_individual, fig_group, fig_education, nrows = 3, shareX = TRUE)
+
+fig <- fig %>% layout(
+  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+  xaxis = list(
+    title = "Days from Start",
+    showgrid = TRUE,
+    tickvals = seq(0, 1000, by = 30),
+    ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+  ),
+  yaxis = list(title = ""),
+  legend = list(
+    x = 1,
+    y = 0.5,
+    traceorder = "normal",
+    font = list(size = 12),
+    bgcolor = 'rgba(255,255,255,0)'
+  )
+)
+
+# Show the plot
+fig
+
+# Save Plotly plot to HTML
+htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
+
+# Use webshot to convert the HTML to PNG
+webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
+
+```
+
+
+```{r}
+library(plotly)
+
+generate_gantt_chart <- function(tasks, start_date, name, color) {
+  tasks$Task <- factor(tasks$Task, levels = rev(tasks$Task))
+  
+  fig <- plot_ly()
+  fig <- fig %>% add_trace(
+    type = 'bar',
+    x = as.numeric(difftime(tasks$End, tasks$Start, units = "days")),
+    y = tasks$Task,
+    base = as.numeric(difftime(tasks$Start, start_date, units = "days")),
+    orientation = 'h',
+    marker = list(color = color, line = list(color = 'rgb(255,255,255)', width = 2)),
+    hoverinfo = "text+x",
+    textposition = 'auto',
+    textfont = list(color = 'black', size = 28, family = ifelse(tasks$Bold, "bold", "regular")),
+    name = name
+  )
+  
+  fig <- fig %>% layout(
+    paper_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    plot_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    shapes = list(
+      list(
+        type = "line",
+        x0 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        x1 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        y0 = 0,
+        y1 = 1,
+        xref = "x",
+        yref = "paper",
+        line = list(color = "red", width = 2, dash = "dash")
+      )
+    ),
+    xaxis = list(
+      title = "Days from Start",
+      showgrid = TRUE,
+      tickfont = list(size = 28),
+      tickvals = seq(0, 1000, by = 30),
+      ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+    ),
+    yaxis = list(title = "",tickfont = list(size = 28))
+  )
+  
+  return(fig)
+}
+
+# Define the start date for the project
+start_date <- as.Date("2022-08-01")
+
+tasks_individual <- data.frame(
+  Task = c("Community Needs Assessment", 
+           "Deploy IMGspec on Cyverse", "Complete IMGspec Deployment", "Descoped IMGspec", 
+           "Prototype Replacement Designs for IMGspec", "Transition to OASIS Templating System", 
+           "Deploy First OASIS Template", "Onboard First Cohort of Postdocs Using OASIS", 
+           "Deploy Own Instances Using CACAO", "Switch to Cyverse DE", "Iterate Use of Cyverse DE", 
+           "Improve DE User Experience", "Fix Known Problems in DE", "Add Functionality to DE"),
+  Start = as.Date(c("2022-08-01", 
+                    "2022-08-01", "2023-06-01", "2023-07-01", 
+                    "2023-01-01", "2023-06-01", 
+                    "2023-10-01", "2024-01-01", 
+                    "2022-08-01", "2023-08-01", "2023-08-01", 
+                    "2024-06-01", "2024-08-01", "2024-12-01")),
+  End = as.Date(c("2023-06-01", 
+                  "2023-05-01", "2023-06-30", "2023-07-31", 
+                  "2023-05-01", "2023-07-31", 
+                  "2023-10-31", "2024-12-31", 
+                  "2023-07-31", "2023-08-31", "2024-05-31", 
+                  "2024-12-31", "2024-12-31", "2025-06-30")),
+  Owner = c("Project Coordinator", "Developer", "Developer", "Project Manager", 
+            "Developer", "Developer", 
+            "Developer", "Project Manager", 
+            "Developer", "Developer", "Project Manager", 
+            "Project Manager", "Project Manager", "Project Manager"),
+  Color = c(rep('rgb(255,165,0)', 3), rep('rgb(0,123,255)', 5), rep('rgb(34,139,34)', 6)),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+
+tasks_group <- data.frame(
+  Task = c("Build ESIIL Internal Documentation", 
+           "Move Education Classes to GitHub", "Push Adoption of GitHub", 
+           "Iterate on Basic Template", "Release Working Group Template", 
+           "Release Postdoc and Education Templates", "Evolve Templates through Iteration", 
+           "Start Event Template", "Use Event Template for Carbon Code Fest", 
+           "Use Event Template for Innovation Summit 2024", "Use Event Template for HYR-SENSE Workshop", 
+           "Use Event Template for Hackathon", "Use Event Template for Innovation Summit 2025"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-02-01", 
+                    "2023-02-01", "2023-10-01", 
+                    "2023-11-01", "2023-11-01", 
+                    "2023-12-01", "2024-03-01", 
+                    "2024-05-01", "2024-06-01", 
+                    "2024-12-01", "2025-05-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-02-01", "2023-10-01", 
+                  "2023-10-01", "2023-10-31", 
+                  "2023-11-30", "2025-06-30", 
+                  "2024-03-01", "2024-03-31", 
+                  "2024-05-31", "2024-06-30", 
+                  "2024-12-31", "2025-05-31")),
+  Owner = c("Project Coordinator", "Project Manager", "Project Manager", 
+            "Developer", "Developer", 
+            "Developer", "Developer", 
+            "Project Manager", "Project Manager", 
+            "Project Manager", "Project Manager", 
+            "Project Manager", "Project Manager"),
+  Color = c(rep('rgb(0,123,255)', 13)),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+
+tasks_education <- data.frame(
+  Task = c("Train ESIIL Staff on Open Science and JupyterHub Basics", 
+           "Develop Pre-summit Training Model", "Pre-summit Training: Basics of GitHub, JupyterHub, R and Python", 
+           "Switch to Cyverse Discovery Environment", "Pre-summit Training: Cyverse DE, SSH keys, GitHub", 
+           "Roll Out OASIS Templates", "Teach OASIS Template Usage", "Start Train the Trainers Program",
+           "Working Group Tech Lead Training Feb 2024", "Carbon Code Fest Pre-summit Training", 
+           "Innovation Summit 2024 Pre-summit Training", "HYR-SENSE 2024 Trainings", 
+           "Hackathon Trainings", "Curriculum Consolidation and Streamline", 
+           "Filming Educational Materials", "Working Group Tech Lead Training Feb-Mar 2025", 
+           "Innovation Summit 2025 Trainings"),
+  Start = as.Date(c("2022-08-01", 
+                    "2023-01-01", "2023-01-01", 
+                    "2023-05-01", "2023-10-01", 
+                    "2023-10-01", "2023-10-01", "2024-01-01",
+                    "2024-02-01", "2024-03-01", 
+                    "2024-04-01", "2024-05-01", 
+                    "2024-06-01", "2024-06-01", 
+                    "2024-08-01", "2025-02-01", 
+                    "2025-04-01")),
+  End = as.Date(c("2023-01-01", 
+                  "2023-06-01", "2023-05-01", 
+                  "2023-10-01", "2023-10-01", 
+                  "2024-01-01", "2024-01-01", "2024-03-15",
+                  "2024-03-01", "2024-03-31", 
+                  "2024-04-30", "2024-05-31", 
+                  "2024-08-31", "2024-08-31", 
+                  "2024-12-31", "2025-03-31", 
+                  "2025-04-30")),
+  Owner = c("Education Team", "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", "Education Team",
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team", "Education Team", 
+            "Education Team"),
+  Color = c('rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 
+            'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 
+            'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 
+            'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)', 'rgb(34,139,34)'),
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+tasks_data_sovereignty <- data.frame(
+  Task = c("Meetings with Tribal Partners", 
+           "Discussions with Native BioData Consortium", "Working Group Formed at Innovation Summit", 
+           "Plan First Working Group Meeting", "First Working Group Meeting for Maka Sitomniya", 
+           "Awarded USDA NIFA Grant", "First Technical Prototype of Data Cube"),
+  Start = as.Date(c("2022-08-01", 
+                    "2022-10-01", "2023-05-01", 
+                    "2024-01-01", "2024-07-01", 
+                    "2023-03-01", "2024-02-01")),
+  End = as.Date(c("2022-10-01", 
+                  "2023-05-01", "2023-12-31", 
+                  "2024-07-01", "2024-08-01", 
+                  "2024-02-01", "2024-06-30")),
+  Owner = c("Project Coordinator", "Project Coordinator", "Project Manager", 
+            "Developer", "Project Manager", 
+            "Project Coordinator", "Developer"),
+  Color = c(rep('rgb(220,20,60)', 7)),  # Crimson color
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+# User Portal tasks
+tasks_user_portal <- data.frame(
+  Task = c("Organize Design and Requirements Between CU IT, CyVerse, and ESIIL", 
+           "Document Use Cases and Requirements", "Build Working Prototype of User Portal", 
+           "Integrate CyVerse User Authentication", "UI Improvements and Implementing Additional Use Cases from Admin Team", 
+           "Deploying User Portal on CU Container Platform", "API Integration for Publication Tracking", 
+           "CyVerse-led CyberInfrastructure Integration", "Data Training for Users", 
+           "Finalize User Interface and Design", "Penetration Testing", 
+           "Beta Testing with Selected Users", "Community Deployment"),
+  Start = as.Date(c("2022-08-01", 
+                    "2022-09-01", "2022-12-01", 
+                    "2023-01-01", "2023-03-01", 
+                    "2023-10-01", "2024-01-01", 
+                    "2024-06-01", "2024-06-01", 
+                    "2024-06-01", "2025-01-01", 
+                    "2024-03-01", "2025-07-01")),
+  End = as.Date(c("2022-12-31", 
+                  "2022-10-31", "2023-04-30", 
+                  "2023-02-28", "2023-11-30", 
+                  "2024-01-31", "2024-06-30", 
+                  "2024-12-31", "2024-12-31", 
+                  "2024-12-31", "2025-03-31", 
+                  "2025-06-30", "2025-07-31")),
+  Owner = c("Project Coordinator", "Project Coordinator", "Developer", 
+            "Developer", "Admin Team", 
+            "Developer", "Developer", 
+            "Developer", "Project Manager", 
+            "UI Team", "Security Team", 
+            "QA Team", "Project Manager"),
+  Color = c(rep('rgb(75,0,130)', 13)),  # Indigo color
+  Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+)
+
+
+# Define colors for each track
+color_individual <- 'rgb(255,165,0)'  # Orange
+color_group <- 'rgb(0,123,255)'      # Blue
+color_education <- 'rgb(34,139,34)'  # Green
+
+# Generate Gantt charts for each track with different colors
+fig_individual <- generate_gantt_chart(tasks_individual, start_date, "User experience and resource deployment", color_individual)
+fig_group <- generate_gantt_chart(tasks_group, start_date, "Collaborative infrastructure", color_group)
+fig_education <- generate_gantt_chart(tasks_education, start_date, "Training provided", color_education)
+fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date, "Data Sovereignty", 'rgb(220,20,60)')
+fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "User Portal", 'rgb(75,0,130)')
+
+
+fig <- subplot(fig_individual, fig_group, fig_education, fig_data_sovereignty, fig_user_portal, nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
+
+
+fig <- fig %>% layout(
+  height = 4000,  # Increase the height to ensure all tasks are visible
+  width = 5000,
+  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+  xaxis = list(
+    title = "Days from Start",
+    showgrid = TRUE,
+    tickvals = seq(0, 1000, by = 30),
+    font = list(size = 28),
+    ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+  ),
+  yaxis = list(title = ""),
+  legend = list(
+    x = 1,
+    y = 0.5,
+    traceorder = "normal",
+    font = list(size = 28),
+    bgcolor = 'rgba(255,255,255,0)'
+  )
+)
+
+# Show the plot
+fig
+
+# Save Plotly plot to HTML
+htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
+
+# Use webshot to convert the HTML to PNG
+webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
+
+```
+
