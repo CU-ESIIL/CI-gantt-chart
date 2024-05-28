@@ -149,7 +149,11 @@ generate_gantt_chart <- function(tasks, start_date, name, color) {
       tickvals = seq(0, 1000, by = 30),
       ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
     ),
-    yaxis = list(title = "",tickfont = list(size = 28))
+    yaxis = list(title = "",
+                 tickfont = list(size = 28), 
+                 showgrid = TRUE,
+                 gridcolor = 'rgb(200,200,200)',  # Color of the grid lines
+      gridwidth = 1 )
   )
   
   return(fig)
@@ -318,19 +322,19 @@ tasks_user_portal <- data.frame(
 
 
 # Define colors for each track
-color_individual <- 'rgb(255,165,0)'  # Orange
-color_group <- 'rgb(0,123,255)'      # Blue
-color_education <- 'rgb(34,139,34)'  # Green
+color_individual <- 'rgb(142,202,230)'  # Orange
+color_group <- 'rgb(3,78,123)'      # Blue
+color_education <- 'rgb(0,32,96)'  # Green
 
 # Generate Gantt charts for each track with different colors
-fig_individual <- generate_gantt_chart(tasks_individual, start_date, "User experience and resource deployment", color_individual)
-fig_group <- generate_gantt_chart(tasks_group, start_date, "Collaborative infrastructure", color_group)
-fig_education <- generate_gantt_chart(tasks_education, start_date, "Training provided", color_education)
-fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date, "Data Sovereignty", 'rgb(220,20,60)')
-fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "User Portal", 'rgb(75,0,130)')
+fig_individual <- generate_gantt_chart(tasks_individual, start_date, "OASIS: User experience and resource deployment", color_individual)
+fig_group <- generate_gantt_chart(tasks_group, start_date, "OASIS: Collaborative infrastructure", color_group)
+fig_education <- generate_gantt_chart(tasks_education, start_date, "OASIS: Training provided", color_education)
+fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date, "Tribal Engagement", 'rgb(255,191,0)')
+fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "ESIIL User Portal", 'rgb(255,87,34)')
 
 
-fig <- subplot(fig_individual, fig_group, fig_education, fig_data_sovereignty, fig_user_portal, nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
+fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, fig_data_sovereignty,  nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
 
 
 fig <- fig %>% layout(
@@ -349,6 +353,7 @@ fig <- fig %>% layout(
   legend = list(
     x = 1,
     y = 0.5,
+    showgrid = TRUE,
     traceorder = "normal",
     font = list(size = 28),
     bgcolor = 'rgba(255,255,255,0)'
@@ -369,7 +374,7 @@ fig <- subplot(fig_individual, fig_group, fig_education, fig_data_sovereignty, f
 
 fig2 <- fig %>% layout(
   height = 1000,  # Increase the height to ensure all tasks are visible
- # width = 1000,
+  width = 800,
   paper_bgcolor='rgba(0,0,0,0)',  # transparent background
   plot_bgcolor='rgba(0,0,0,0)',  # transparent background
   xaxis = list(
