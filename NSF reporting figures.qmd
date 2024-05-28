@@ -364,5 +364,37 @@ htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
 # Use webshot to convert the HTML to PNG
 webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
 
+
+fig <- subplot(fig_individual, fig_group, fig_education, fig_data_sovereignty, fig_user_portal, nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
+
+fig2 <- fig %>% layout(
+  height = 1000,  # Increase the height to ensure all tasks are visible
+ # width = 1000,
+  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+  xaxis = list(
+    title = "Days from Start",
+    showgrid = TRUE,
+    tickvals = seq(0, 1000, by = 30),
+    font = list(size = 14),
+    ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+  ),
+  yaxis = list(title = ""),
+  legend = list(
+    x = 1,
+    y = 0.5,
+    traceorder = "normal",
+    font = list(size = 12),
+    bgcolor = 'rgba(255,255,255,0)'
+  )
+)
+
+# Show the plot
+fig2
+
+# Save Plotly plot to HTML
+htmlwidgets::saveWidget(as_widget(fig2), "temp_plot.html", selfcontained = TRUE)
+
+
 ```
 
