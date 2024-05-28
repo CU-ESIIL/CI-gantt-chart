@@ -164,29 +164,64 @@ start_date <- as.Date("2022-08-01")
 
 tasks_individual <- data.frame(
   Task = c("Community Needs Assessment", 
-           "Deploy IMGspec on Cyverse", "Complete IMGspec Deployment", "Descoped IMGspec", 
-           "Prototype Replacement Designs for IMGspec", "Transition to OASIS Templating System", 
-           "Deploy First OASIS Template", "Onboard First Cohort of Postdocs Using OASIS", 
-           "Deploy Own Instances Using CACAO", "Switch to Cyverse DE", "Iterate Use of Cyverse DE", 
-           "Improve DE User Experience", "Fix Known Problems in DE", "Add Functionality to DE"),
+           "Deploy IMGspec on Cyverse", 
+           "Deploy Own Instances Using CACAO",
+           "Prototype Replacement Designs for IMGspec", 
+           "Complete IMGspec Deployment", 
+           "Transition to OASIS Templating System",
+           "Descoped IMGspec", 
+           "Switch to Cyverse DE", 
+           "Deploy First OASIS Template", 
+           "Iterate Use of Cyverse DE", 
+           "Onboard First Cohort of Postdocs Using OASIS", 
+           "Improve DE User Experience", 
+           "Fix Known Problems in DE", 
+           "Add Functionality to DE"),
   Start = as.Date(c("2022-08-01", 
-                    "2022-08-01", "2023-06-01", "2023-07-01", 
-                    "2023-01-01", "2023-06-01", 
-                    "2023-10-01", "2024-01-01", 
-                    "2022-08-01", "2023-08-01", "2023-08-01", 
-                    "2024-06-01", "2024-08-01", "2024-12-01")),
+                    "2022-08-01", 
+                    "2022-08-01",
+                    "2023-01-01", 
+                    "2023-06-01", 
+                    "2023-06-01",
+                    "2023-07-01", 
+                    "2023-08-01", 
+                    "2023-10-01", 
+                    "2023-08-01", 
+                    "2024-01-01", 
+                    "2024-06-01", 
+                    "2024-08-01", 
+                    "2024-12-01")),
   End = as.Date(c("2023-06-01", 
-                  "2023-05-01", "2023-06-30", "2023-07-31", 
-                  "2023-05-01", "2023-07-31", 
-                  "2023-10-31", "2024-12-31", 
-                  "2023-07-31", "2023-08-31", "2024-05-31", 
-                  "2024-12-31", "2024-12-31", "2025-06-30")),
-  Owner = c("Project Coordinator", "Developer", "Developer", "Project Manager", 
-            "Developer", "Developer", 
-            "Developer", "Project Manager", 
-            "Developer", "Developer", "Project Manager", 
-            "Project Manager", "Project Manager", "Project Manager"),
-  Color = c(rep('rgb(255,165,0)', 3), rep('rgb(0,123,255)', 5), rep('rgb(34,139,34)', 6)),
+                  "2023-05-01", 
+                  "2023-07-31",
+                  "2023-05-01", 
+                  "2023-06-30", 
+                  "2023-07-31",
+                  "2023-07-31", 
+                  "2023-08-31", 
+                  "2023-10-31", 
+                  "2024-05-31", 
+                  "2024-12-31", 
+                  "2024-12-31", 
+                  "2024-12-31", 
+                  "2025-06-30")),
+  Owner = c("Project Coordinator", 
+            "Developer", 
+            "Developer",
+            "Developer", 
+            "Developer", 
+            "Developer",
+            "Project Manager", 
+            "Developer", 
+            "Developer", 
+            "Project Manager", 
+            "Project Manager", 
+            "Project Manager", 
+            "Project Manager", 
+            "Project Manager"),
+  Color = c(rep('rgb(255,165,0)', 3), 
+            rep('rgb(0,123,255)', 5), 
+            rep('rgb(34,139,34)', 6)),
   Bold = c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
 )
 
@@ -209,7 +244,7 @@ tasks_group <- data.frame(
   End = as.Date(c("2023-01-01", 
                   "2023-02-01", "2023-10-01", 
                   "2023-10-01", "2023-10-31", 
-                  "2023-11-30", "2025-06-30", 
+                  "2023-11-30", "2024-06-30", 
                   "2024-03-01", "2024-03-31", 
                   "2024-05-31", "2024-06-30", 
                   "2024-12-31", "2025-05-31")),
@@ -323,7 +358,7 @@ tasks_user_portal <- data.frame(
 
 # Define colors for each track
 color_individual <- 'rgb(142,202,230)'  # Orange
-color_group <- 'rgb(3,78,123)'      # Blue
+color_group <- 'rgb(50,130,189)'      # Blue
 color_education <- 'rgb(0,32,96)'  # Green
 
 # Generate Gantt charts for each track with different colors
@@ -334,8 +369,9 @@ fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date,
 fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "ESIIL User Portal", 'rgb(255,87,34)')
 
 
-fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, fig_data_sovereignty,  nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
+#fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, fig_data_sovereignty,  nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
 
+fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal,  nrows = 4, shareX = TRUE, heights = c(0.25,0.25,0.25,0.25))
 
 fig <- fig %>% layout(
   height = 4000,  # Increase the height to ensure all tasks are visible
