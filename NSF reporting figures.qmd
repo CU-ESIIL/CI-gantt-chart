@@ -123,7 +123,7 @@ generate_gantt_chart <- function(tasks, start_date, name, color) {
     marker = list(color = color, line = list(color = 'rgb(255,255,255)', width = 2)),
     hoverinfo = "text+x",
     textposition = 'auto',
-    textfont = list(color = 'black', size = 28, family = ifelse(tasks$Bold, "bold", "regular")),
+    textfont = list(color = 'black', size = 42, family = "bold"),
     name = name
   )
   
@@ -145,12 +145,12 @@ generate_gantt_chart <- function(tasks, start_date, name, color) {
     xaxis = list(
       title = "Days from Start",
       showgrid = TRUE,
-      tickfont = list(size = 28),
+       textfont = list(color = 'black', size = 28, family = "bold"),
       tickvals = seq(0, 1000, by = 30),
       ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
     ),
     yaxis = list(title = "",
-                 tickfont = list(size = 28), 
+                  textfont = list(color = 'black', size = 28, family = "bold"),
                  showgrid = TRUE,
                  gridcolor = 'rgb(200,200,200)',  # Color of the grid lines
       gridwidth = 1 )
@@ -374,8 +374,8 @@ fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "ESIIL Us
 fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal,  nrows = 4, shareX = TRUE, heights = c(0.25,0.25,0.25,0.25))
 
 fig <- fig %>% layout(
-  height = 4000,  # Increase the height to ensure all tasks are visible
-  width = 5000,
+  height = 1200,  # Increase the height to ensure all tasks are visible
+  width = 1500,
   paper_bgcolor='rgba(0,0,0,0)',  # transparent background
   plot_bgcolor='rgba(0,0,0,0)',  # transparent background
   xaxis = list(
@@ -385,7 +385,7 @@ fig <- fig %>% layout(
     font = list(size = 28),
     ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
   ),
-  yaxis = list(title = ""),
+  yaxis = list(title = "", size = 35, textfont = list(color = 'black', family = "bold")),
   legend = list(
     x = 1,
     y = 0.5,
@@ -406,36 +406,186 @@ htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
 webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
 
 
-fig <- subplot(fig_individual, fig_group, fig_education, fig_data_sovereignty, fig_user_portal, nrows = 5, shareX = TRUE, heights = c(0.2,0.2,0.2,0.2,0.2))
 
-fig2 <- fig %>% layout(
-  height = 1000,  # Increase the height to ensure all tasks are visible
-  width = 800,
-  paper_bgcolor='rgba(0,0,0,0)',  # transparent background
-  plot_bgcolor='rgba(0,0,0,0)',  # transparent background
+```
+
+
+```{r}
+library(plotly)
+
+generate_gantt_chart <- function(tasks, start_date, name, color) {
+  tasks$Task <- factor(tasks$Task, levels = rev(tasks$Task))
+  
+  fig <- plot_ly()
+  fig <- fig %>% add_trace(
+    type = 'bar',
+    x = as.numeric(difftime(tasks$End, tasks$Start, units = "days")),
+    y = tasks$Task,
+    base = as.numeric(difftime(tasks$Start, start_date, units = "days")),
+    orientation = 'h',
+    marker = list(color = color, line = list(color = 'rgb(255,255,255)', width = 2)),
+    hoverinfo = "text+x",
+    textposition = 'auto',
+    textfont = list(color = 'black', size = 42, family = "Arial, bold"),
+    name = name,
+    showlegend=FALSE
+  )
+  
+  fig <- fig %>% layout(
+    paper_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    plot_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+    shapes = list(
+      list(
+        type = "line",
+        x0 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        x1 = as.numeric(difftime(as.Date("2024-06-01"), start_date, units = "days")),
+        y0 = 0,
+        y1 = 1,
+        xref = "x",
+        yref = "paper",
+        line = list(color = "red", width = 2, dash = "dash")
+      )
+    ),
+    xaxis = list(
+      title = "Days from Start",
+      showgrid = TRUE,
+      tickvals = seq(0, 1000, by = 30),
+      ticktext = format(seq(start_date, by = "month", length.out = 36), "%b %Y"),
+      tickfont = list(size = 20, family = "Arial, bold", color = 'black'),
+      titlefont = list(size = 24, family = "Arial, bold", color = 'black')
+    ),
+    yaxis = list(
+      title = "",
+      tickfont = list(size = 20, family = "Arial, bold", color = 'black'),
+      titlefont = list(size = 24, family = "Arial, bold", color = 'black'),
+      showgrid = TRUE,
+      gridcolor = 'rgb(200,200,200)',  # Color of the grid lines
+      gridwidth = 1
+    )
+  )
+  
+  return(fig)
+}
+
+# Define the start date for the project
+start_date <- as.Date("2022-08-01")
+
+tasks_individual <- data.frame(
+  Task = c("Community Needs Assessment", "Deploy IMGspec on Cyverse", "Deploy Own Instances Using CACAO",
+           "Prototype Replacement Designs for IMGspec", "Complete IMGspec Deployment", "Transition to OASIS Templating System",
+           "Descoped IMGspec", "Switch to Cyverse DE", "Deploy First OASIS Template", "Iterate Use of Cyverse DE",
+           "Onboard First Cohort of Postdocs Using OASIS", "Improve DE User Experience", "Fix Known Problems in DE",
+           "Add Functionality to DE", "OASIS Cyberinfrastructure", "New and Recorded Trainings for Sustainable Scaling Up", 
+           "Advanced Docker Containers", "Community Support & Guidance on NSF CI Resources", "Access Allocations (ACCESS-NSF)", 
+           "The Open Storage Network (OSN-NSF)", "National AI Research Resource Pilot (NAIRR-NSF)"),
+  Start = as.Date(c("2022-08-01", "2022-08-01", "2022-08-01", "2023-01-01", "2023-06-01", "2023-06-01",
+                    "2023-07-01", "2023-08-01", "2023-10-01", "2023-08-01", "2024-01-01", "2024-06-01",
+                    "2024-08-01", "2024-12-01", "2025-01-01", "2025-01-01", "2025-01-01", "2025-01-01", 
+                    "2025-01-01", "2025-01-01", "2025-01-01")),
+  End = as.Date(c("2023-06-01", "2023-05-01", "2023-07-31", "2023-05-01", "2023-06-30", "2023-07-31",
+                  "2023-07-31", "2023-08-31", "2023-10-31", "2024-05-31", "2024-12-31", "2024-12-31",
+                  "2024-12-31", "2025-06-30", "2025-06-30", "2025-06-30", "2025-06-30", "2025-06-30", 
+                  "2025-06-30", "2025-06-30", "2025-06-30")),
+  Color = rep('rgb(204,255,102)', 21)  # Light Lime Green
+)
+
+
+
+tasks_group <- data.frame(
+  Task = c("Build Internal Documentation", "Move Education Classes to GitHub", "Push Adoption of GitHub",
+           "Iterate on Basic Template", "Release Working Group Template", "Release Postdoc and Education Templates",
+           "Evolve Templates Through Iteration", "Start Event Template", "Use Event Template for Carbon Code Fest",
+           "Use Event Template for Innovation Summit 2024", "Use Event Template for HYR-SENSE Workshop",
+           "Use Event Template for Hackathon", "Use Event Template for Innovation Summit 2025",
+           "OASIS Cyberinfrastructure", "OASIS Main Page", "Data Registry, Analytics, and Education Repositories"),
+  Start = as.Date(c("2022-08-01", "2023-01-01", "2023-02-01", "2023-02-01", "2023-10-01", "2023-11-01",
+                    "2023-11-01", "2023-12-01", "2024-03-01", "2024-05-01", "2024-06-01", "2024-12-01",
+                    "2025-05-01", "2025-01-01", "2025-01-01", "2025-01-01")),
+  End = as.Date(c("2023-01-01", "2023-02-01", "2023-10-01", "2023-10-01", "2023-10-31", "2023-11-30",
+                  "2024-06-30", "2024-03-01", "2024-03-31", "2024-05-31", "2024-06-30", "2024-12-31",
+                  "2025-05-31", "2025-06-30", "2025-06-30", "2025-06-30")),
+  Color = rep('rgb(153,255,51)', 16)  # Medium Lime Green
+)
+
+
+
+tasks_education <- data.frame(
+  Task = c("Open Science and JupyterHub Basics", "Pre-summit Training Model",
+           "Pre-summit: GitHub, JupyterHub, R, Python", "Switch to Cyverse Discovery Environment",
+           "Pre-summit: Cyverse DE, SSH Keys, GitHub", "Roll Out OASIS Templates", "OASIS Template Usage",
+           "Train the Trainers Program", "Tech Lead Training 2024", "Carbon Code Fest Pre-summit",
+           "Innovation Summit 2024 Pre-summit", "HYR-SENSE 2024", "Hackathon Trainings",
+           "Consolidate and Streamline Curriculum", "Film Educational Materials", "Tech Lead Training 2025",
+           "Innovation Summit 2025"),
+  Start = as.Date(c("2022-08-01", "2023-01-01", "2023-01-01", "2023-05-01", "2023-10-01", "2023-10-01", "2023-10-01",
+                    "2024-01-01", "2024-02-01", "2024-03-01", "2024-04-01", "2024-05-01", "2024-06-01",
+                    "2024-06-01", "2024-08-01", "2025-02-01", "2025-04-01")),
+  End = as.Date(c("2023-01-01", "2023-06-01", "2023-05-01", "2023-10-01", "2023-10-01", "2024-01-01", "2024-01-01",
+                  "2024-03-15", "2024-03-01", "2024-03-31", "2024-04-30", "2024-05-31", "2024-08-31",
+                  "2024-08-31", "2024-12-31", "2025-03-31", "2025-04-30")),
+  Color = rep('rgb(102,255,0)', 17)  # Dark Lime Green
+)
+
+tasks_data_sovereignty <- data.frame(
+  Task = c("Conduct Meetings with Tribal Partners", "Discuss with Native BioData Consortium", "Form Working Group at Innovation Summit",
+           "Plan First Working Group Meeting", "Hold First Working Group Meeting for Maka Sitomniya", "Awarded USDA NIFA Grant",
+           "Develop First Technical Prototype of Data Cube"),
+  Start = as.Date(c("2022-08-01", "2022-10-01", "2023-05-01", "2024-01-01", "2024-07-01", "2023-03-01", "2024-02-01")),
+  End = as.Date(c("2022-10-01", "2023-05-01", "2023-12-31", "2024-07-01", "2024-08-01", "2024-02-01", "2024-06-30")),
+  Color = rep('rgb(220,20,60)', 7)  # Crimson color
+)
+
+tasks_user_portal <- data.frame(
+  Task = c("Organize Design and Requirements", "Document Use Cases and Requirements",
+           "Build Working Prototype of User Portal", "Integrate CyVerse User Authentication",
+           "Implement UI Improvements and Additional Use Cases", "Deploy User Portal on CU Container Platform",
+           "Integrate API for Publication Tracking", "Integrate CyVerse-led CyberInfrastructure", "Conduct Data Training for Users",
+           "Finalize User Interface and Design", "Conduct Penetration Testing", "Conduct Beta Testing with Selected Users", "Community Deployment"),
+  Start = as.Date(c("2022-08-01", "2022-09-01", "2022-12-01", "2023-01-01", "2023-03-01", "2023-10-01", "2024-01-01",
+                    "2024-06-01", "2024-06-01", "2024-06-01", "2025-01-01", "2025-01-01", "2025-07-01")),
+  End = as.Date(c("2022-12-31", "2022-10-31", "2023-04-30", "2023-02-28", "2023-11-30", "2024-01-31", "2024-06-30",
+                  "2024-12-31", "2024-12-31", "2024-12-31", "2025-03-31", "2025-06-30", "2025-07-31")),
+  Color = rep('rgb(75,0,130)', 13)  # Indigo color
+)
+
+# Generate Gantt charts for each track with different colors
+fig_individual <- generate_gantt_chart(tasks_individual, start_date, "OASIS: User experience and resource deployment", 'rgb(142,202,230)')
+fig_group <- generate_gantt_chart(tasks_group, start_date, "OASIS: Collaborative infrastructure", 'rgb(50,130,189)')
+fig_education <- generate_gantt_chart(tasks_education, start_date, "OASIS: Training provided", 'rgb(0,32,96)')
+fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date, "Tribal Engagement", 'rgb(255,191,0)')
+fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "ESIIL User Portal", 'rgb(50,205,50)')
+
+# Combine the Gantt charts into a single plot
+fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, nrows = 4, shareX = TRUE, heights = c(0.25, 0.25, 0.30, 0.20))
+
+fig <- fig %>% layout(
+  height = 2000,  # Increase the height to ensure all tasks are visible
+  width = 1500,
+  paper_bgcolor = 'rgba(0,0,0,0)',  # transparent background
+  plot_bgcolor = 'rgba(0,0,0,0)',  # transparent background
   xaxis = list(
     title = "Days from Start",
     showgrid = TRUE,
     tickvals = seq(0, 1000, by = 30),
-    font = list(size = 14),
-    ticktext = seq(start_date, length.out = 36, by = "month") %>% format("%b %Y")
+    font = list(size = 28),
+    ticktext = format(seq(start_date, by = "month", length.out = 36), "%b %Y")
   ),
-  yaxis = list(title = ""),
-  legend = list(
-    x = 1,
-    y = 0.5,
-    traceorder = "normal",
-    font = list(size = 12),
-    bgcolor = 'rgba(255,255,255,0)'
-  )
+  yaxis = list(
+    title = "", size = 35, textfont = list(color = 'black', family = "bold")
+  )#,
+  #legend = list(
+ #   x = 1, y = 0.5, showgrid = TRUE, traceorder = "normal", font = list(size = 12), bgcolor = #'rgba(255,255,255,0)'
+#  )
 )
 
 # Show the plot
-fig2
+fig
 
 # Save Plotly plot to HTML
-htmlwidgets::saveWidget(as_widget(fig2), "temp_plot.html", selfcontained = TRUE)
+htmlwidgets::saveWidget(as_widget(fig), "temp_plot.html", selfcontained = TRUE)
 
+# Use webshot to convert the HTML to PNG
+webshot::webshot("temp_plot.html", "gantt_chart.png", delay = 5)  # delay may need adjustment
 
 ```
 
