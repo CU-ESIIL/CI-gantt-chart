@@ -475,18 +475,18 @@ tasks_individual <- data.frame(
            "Prototype Replacement Designs for IMGspec", "Complete IMGspec Deployment", "Transition to OASIS Templating System",
            "Descoped IMGspec", "Switch to Cyverse DE", "Deploy First OASIS Template", "Iterate Use of Cyverse DE",
            "Onboard First Cohort of Postdocs Using OASIS", "Improve DE User Experience", "Fix Known Problems in DE",
-           "Add Functionality to DE", "OASIS Cyberinfrastructure", "New and Recorded Trainings for Sustainable Scaling Up", 
-           "Advanced Docker Containers", "Community Support & Guidance on NSF CI Resources", "Access Allocations (ACCESS-NSF)", 
+           "Add more AI and Large Memory Functionality to DE", "Recorded Trainings for Sustainable Scaling Up", 
+           "Workgin Groups: Advanced Docker Containers", "Working Groups: Access Allocations (ACCESS-NSF)", 
            "The Open Storage Network (OSN-NSF)", "National AI Research Resource Pilot (NAIRR-NSF)"),
   Start = as.Date(c("2022-08-01", "2022-08-01", "2022-08-01", "2023-01-01", "2023-06-01", "2023-06-01",
                     "2023-07-01", "2023-08-01", "2023-10-01", "2023-08-01", "2024-01-01", "2024-06-01",
-                    "2024-08-01", "2024-12-01", "2025-01-01", "2025-01-01", "2025-01-01", "2025-01-01", 
-                    "2025-01-01", "2025-01-01", "2025-01-01")),
+                    "2024-08-01", "2024-12-01", "2025-01-01", "2024-07-01", "2025-01-01", "2025-01-01", 
+                    "2025-01-01")),
   End = as.Date(c("2023-06-01", "2023-05-01", "2023-07-31", "2023-05-01", "2023-06-30", "2023-07-31",
                   "2023-07-31", "2023-08-31", "2023-10-31", "2024-05-31", "2024-12-31", "2024-12-31",
                   "2024-12-31", "2025-06-30", "2025-06-30", "2025-06-30", "2025-06-30", "2025-06-30", 
-                  "2025-06-30", "2025-06-30", "2025-06-30")),
-  Color = rep('rgb(204,255,102)', 21)  # Light Lime Green
+                  "2025-06-30")),
+  Color = rep('rgb(204,255,102)', 19)  # Light Lime Green
 )
 
 
@@ -497,14 +497,14 @@ tasks_group <- data.frame(
            "Evolve Templates Through Iteration", "Start Event Template", "Use Event Template for Carbon Code Fest",
            "Use Event Template for Innovation Summit 2024", "Use Event Template for HYR-SENSE Workshop",
            "Use Event Template for Hackathon", "Use Event Template for Innovation Summit 2025",
-           "OASIS Cyberinfrastructure", "OASIS Main Page", "Data Registry, Analytics, and Education Repositories"),
+           "OASIS Directory/Main Page", "Add Content: OASIS Data, Analytics, and Education Repositories"),
   Start = as.Date(c("2022-08-01", "2023-01-01", "2023-02-01", "2023-02-01", "2023-10-01", "2023-11-01",
                     "2023-11-01", "2023-12-01", "2024-03-01", "2024-05-01", "2024-06-01", "2024-12-01",
-                    "2025-05-01", "2025-01-01", "2025-01-01", "2025-01-01")),
+                    "2025-05-01", "2024-07-01", "2025-01-01")),
   End = as.Date(c("2023-01-01", "2023-02-01", "2023-10-01", "2023-10-01", "2023-10-31", "2023-11-30",
                   "2024-06-30", "2024-03-01", "2024-03-31", "2024-05-31", "2024-06-30", "2024-12-31",
-                  "2025-05-31", "2025-06-30", "2025-06-30", "2025-06-30")),
-  Color = rep('rgb(153,255,51)', 16)  # Medium Lime Green
+                  "2025-05-31", "2025-06-30", "2025-06-30")),
+  Color = rep('rgb(153,255,51)', 15)  # Medium Lime Green
 )
 
 
@@ -556,10 +556,10 @@ fig_data_sovereignty <- generate_gantt_chart(tasks_data_sovereignty, start_date,
 fig_user_portal <- generate_gantt_chart(tasks_user_portal, start_date, "ESIIL User Portal", 'rgb(50,205,50)')
 
 # Combine the Gantt charts into a single plot
-fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, nrows = 4, shareX = TRUE, heights = c(0.25, 0.25, 0.30, 0.20))
+fig <- subplot(fig_individual, fig_group, fig_education, fig_user_portal, nrows = 4, shareX = TRUE, heights = c(0.30, 0.25, 0.25, 0.20))
 
 fig <- fig %>% layout(
-  height = 2000,  # Increase the height to ensure all tasks are visible
+  height = 2500,  # Increase the height to ensure all tasks are visible
   width = 1500,
   paper_bgcolor = 'rgba(0,0,0,0)',  # transparent background
   plot_bgcolor = 'rgba(0,0,0,0)',  # transparent background
